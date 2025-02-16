@@ -38,7 +38,7 @@
 
         "plugin_name"           "ff2r_ability_menu"
     }
- Jeżeli chcesz możesz poszponić z tym skryptem redowsky
+
 */
 
 
