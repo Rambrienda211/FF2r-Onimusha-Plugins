@@ -1,11 +1,13 @@
 /* 
 
-    "rage_ability_menu"
+	"rage_ability_menu"
     {
         "slot"                  "0"                     // Ability slot
         "mana_start"            "100.0"                // Starting mana
         "mana_max"              "100.0"                // Maximum mana
         "mana_regen"            "1.0"                  // Mana regeneration per tick
+        "switch"                "3"                    // 3 = R switch ability
+        "key"                   "2"                    // 2 = M3 use ability
 
         "menu_position"         "0"                    // Menu position (0: Center, 1: Top, 2: Bottom)
         "menu_color_r"          "255"                  // Menu text color (Red)
@@ -16,18 +18,27 @@
         "ability_name_1"        "Fireball"             // Name of ability 1
         "ability_cost_1"        "30.0"                 // Cost of ability 1
         "ability_cooldown_1"    "10.0"                 // Cooldown of ability 1
+        "global cooldown"	    "30.0"	               // Like 'cooldown', but applies to all spells
+		"low"		            "8"		               // Lowest ability slot to activate. If left blank, "high" is used
+		"high"		            "8"		               // Highest ability slot to activate. If left blank, "low" is used
 
         "ability_name_2"        "Ice Blast"            // Name of ability 2
         "ability_cost_2"        "40.0"                 // Cost of ability 2
         "ability_cooldown_2"    "15.0"                 // Cooldown of ability 2
+        "global cooldown"	    "30.0"	               // Like 'cooldown', but applies to all spells
+		"low"		            "8"		               // Lowest ability slot to activate. If left blank, "high" is used
+		"high"		            "8"		               // Highest ability slot to activate. If left blank, "low" is used
 
         "ability_name_3"        "Lightning Strike"     // Name of ability 3
         "ability_cost_3"        "50.0"                 // Cost of ability 3
         "ability_cooldown_3"    "20.0"                 // Cooldown of ability 3
+        "global cooldown"	    "30.0"	               // Like 'cooldown', but applies to all spells
+		"low"		            "8"		               // Lowest ability slot to activate. If left blank, "high" is used
+		"high"		            "8"		               // Highest ability slot to activate. If left blank, "low" is used
 
         "plugin_name"           "ff2r_ability_menu"
     }
-
+ Jeżeli chcesz możesz poszponić z tym skryptem redowsky
 */
 
 
