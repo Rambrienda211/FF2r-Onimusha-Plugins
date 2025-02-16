@@ -2,17 +2,16 @@
     "rage_gravity_wave"
     {
         "slot"                  "0"                     // Ability slot
-        "radius"                "500.0"                 // Radius of the gravity wave
+        
+        "duration"         		"5.0"                   // Duration
         "damage"                "50.0"                  // Damage dealt to players
-        "force"                 "500.0"                 // Knockback force
-        "slow_duration"         "5.0"                   // Duration of the slow effect
-        "slow_multiplier"       "0.5"                   // Movement speed multiplier during slow
+        "radius"                "500.0"                 // Radius of the gravity wave
+        "force"                 "750.0"                 // Knockback force
+        "slow_multiplier"       "0.50"                  // Movement speed multiplier during slow
 
         "plugin_name"           "ff2r_gravity_wave"
     }
-    
 */
-
 
 #include <sourcemod>
 #include <sdktools>
@@ -21,7 +20,6 @@
 #include <ff2r>
 #include <tf2_stocks>
 #include <tf2items>
-
 #undef REQUIRE_PLUGIN
 #include <tf2attributes>
 #define REQUIRE_PLUGIN
@@ -29,34 +27,36 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_NAME    "Freak Fortress 2 Rewrite: Gravity Wave"
-#define PLUGIN_AUTHOR  "Onimusha"
-#define PLUGIN_DESC    "Gravity wave ability for FF2R"
-#define PLUGIN_VERSION "1.0.0"
-#define PLUGIN_URL     ""
+#define PLUGIN_NAME 		"Freak Fortress 2 Rewrite: Gravity Wave"
+#define PLUGIN_AUTHOR 		"Onimusha and Demo Samedi"
+#define PLUGIN_DESC 		"Gravity wave ability for FF2R"
 
-#define MAXTF2PLAYERS 36
-#define INACTIVE 100000000.0
+#define MAJOR_REVISION 		"1"
+#define MINOR_REVISION 		"0"
+#define STABLE_REVISION 	"0"
+#define PLUGIN_VERSION 		MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
-float GW_Radius[MAXTF2PLAYERS];
-float GW_Damage[MAXTF2PLAYERS];
-float GW_Force[MAXTF2PLAYERS];
-float GW_SlowDuration[MAXTF2PLAYERS];
-float GW_SlowMultiplier[MAXTF2PLAYERS];
+#define MAXTF2PLAYERS		MAXPLAYERS+1
+#define INACTIVE 			100000000.0	
 
 public Plugin myinfo = 
 {
-    name        = PLUGIN_NAME,
-    author      = PLUGIN_AUTHOR,
-    description = PLUGIN_DESC,
-    version     = PLUGIN_VERSION,
-    url         = PLUGIN_URL,
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description	= PLUGIN_DESC,
+	version 	= PLUGIN_VERSION,
 };
+
+float GW_Duration[MAXTF2PLAYERS];
+float GW_Damage[MAXTF2PLAYERS];
+float GW_Radius[MAXTF2PLAYERS];
+float GW_Force[MAXTF2PLAYERS];
+float GW_SlowMultiplier[MAXTF2PLAYERS];
 
 public void OnPluginStart()
 {    
-    PrecacheSound("weapons/physcannon/energy_sing_explode2.wav");
-    PrecacheModel("sprites/strider_blackball.spr");
+    PrecacheSound("weapons/physcannon/energy_sing_explosion2.wav");
+    PrecacheModel("materials/sprites/strider_blackball.vmt");
 }
 
 public void FF2R_OnAbility(int clientIdx, const char[] ability, AbilityData cfg)
@@ -72,13 +72,13 @@ public void FF2R_OnAbility(int clientIdx, const char[] ability, AbilityData cfg)
 
 public void Ability_GravityWave(int clientIdx, const char[] ability_name, AbilityData ability)
 {
-    GW_Radius[clientIdx] = ability.GetFloat("radius", 500.0);
-    GW_Damage[clientIdx] = ability.GetFloat("damage", 50.0);
-    GW_Force[clientIdx] = ability.GetFloat("force", 500.0);
-    GW_SlowDuration[clientIdx] = ability.GetFloat("slow_duration", 5.0);
-    GW_SlowMultiplier[clientIdx] = ability.GetFloat("slow_multiplier", 0.5);
-
-    CreateGravityWave(clientIdx);
+	GW_Duration[clientIdx] = ability.GetFloat("duration", 5.0);
+	GW_Damage[clientIdx] = ability.GetFloat("damage", 50.0);
+	GW_Radius[clientIdx] = ability.GetFloat("radius", 500.0);
+	GW_Force[clientIdx] = ability.GetFloat("force", 750.0);
+	GW_SlowMultiplier[clientIdx] = ability.GetFloat("slow_multiplier", 0.50);
+	
+	CreateGravityWave(clientIdx);
 }
 
 public void CreateGravityWave(int clientIdx)
@@ -87,10 +87,10 @@ public void CreateGravityWave(int clientIdx)
     GetClientAbsOrigin(clientIdx, bossPos);
 
     // Play sound effect
-    EmitSoundToAll("weapons/physcannon/energy_sing_explode2.wav", clientIdx);
+    EmitSoundToAll("weapons/physcannon/energy_sing_explosion2.wav", clientIdx);
 
     // Create particle effect
-    TE_SetupBeamRingPoint(bossPos, 10.0, GW_Radius[clientIdx], PrecacheModel("sprites/strider_blackball.spr"), 0, 0, 10, 10.0, 10.0, 5.0, {255, 255, 255, 255}, 10, 0);
+    TE_SetupBeamRingPoint(bossPos, 10.0, GW_Radius[clientIdx], PrecacheModel("materials/sprites/strider_blackball.vmt"), 0, 0, 10, 10.0, 10.0, 5.0, {255, 255, 255, 255}, 10, 0);
     TE_SendToAll();
 
     // Affect players in radius
@@ -115,7 +115,7 @@ public void CreateGravityWave(int clientIdx)
                 TeleportEntity(i, NULL_VECTOR, NULL_VECTOR, direction);
 
                 // Apply slow effect
-                TF2_AddCondition(i, TFCond_Slowed, GW_SlowDuration[clientIdx]);
+                TF2_AddCondition(i, TFCond_Slowed, GW_Duration[clientIdx]);
                 TF2Attrib_SetByName(i, "move speed bonus", GW_SlowMultiplier[clientIdx]);
             }
         }
