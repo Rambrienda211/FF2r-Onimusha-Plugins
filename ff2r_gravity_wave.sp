@@ -1,5 +1,5 @@
 /*
-    "rage_gravity_wave"
+    "rage_gravity_wave"									// Ability name can use suffixes
     {
         "slot"                  "0"                     // Ability slot
         
@@ -37,7 +37,7 @@
 #define PLUGIN_VERSION 		MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
 #define MAXTF2PLAYERS		MAXPLAYERS+1
-#define INACTIVE 			100000000.0	
+#define INACTIVE			100000000.0
 
 public Plugin myinfo = 
 {
@@ -61,13 +61,13 @@ public void OnPluginStart()
 
 public void FF2R_OnAbility(int clientIdx, const char[] ability, AbilityData cfg)
 {
-    if (!cfg.IsMyPlugin())    
-        return;
-    
-    if (StrEqual(ability, "rage_gravity_wave", false))
-    {
-        Ability_GravityWave(clientIdx, ability, cfg);
-    }
+	if(!cfg.IsMyPlugin())	// Incase of duplicated ability names
+		return;
+	
+	if(!StrContains(ability, "rage_gravity_wave", false))
+	{
+		Ability_GravityWave(clientIdx, ability, cfg);
+	}
 }
 
 public void Ability_GravityWave(int clientIdx, const char[] ability_name, AbilityData ability)
