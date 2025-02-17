@@ -1,16 +1,15 @@
 /*
+	"rage_black_hole"									// Ability name can use suffixes
+	{
+    	"slot"                  "0"                     // Ability slot
+    	
+    	"duration"              "10.0"                  // Duration of the black hole
+    	"damage"                "25.0"                  // Damage per tick
+    	"radius"                "500.0"                 // Radius of the black hole
+    	"force"                 "1000.0"                // Pull force
 
-"rage_black_hole"
-{
-    "slot"                  "0"                     // Ability slot
-    "radius"                "500.0"                 // Radius of the black hole
-    "force"                 "1000.0"                // Pull force
-    "damage"                "25.0"                  // Damage per tick
-    "duration"              "10.0"                  // Duration of the black hole
-
-    "plugin_name"           "ff2r_black_hole"
-}
-
+    	"plugin_name"           "ff2r_black_hole"
+	}
 */
 
 #include <sourcemod>
@@ -20,7 +19,6 @@
 #include <ff2r>
 #include <tf2_stocks>
 #include <tf2items>
-
 #undef REQUIRE_PLUGIN
 #include <tf2attributes>
 #define REQUIRE_PLUGIN
@@ -28,66 +26,68 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_NAME    "Freak Fortress 2 Rewrite: Black Hole"
-#define PLUGIN_AUTHOR  "Onimusha"
-#define PLUGIN_DESC    "Black hole ability for FF2R"
-#define PLUGIN_VERSION "1.0.0"
-#define PLUGIN_URL     ""
+#define PLUGIN_NAME 		"Freak Fortress 2 Rewrite: Black Hole"
+#define PLUGIN_AUTHOR 		"Onimusha and Demo Samedi"
+#define PLUGIN_DESC 		"Black hole ability for FF2R"
 
-#define MAXTF2PLAYERS 36
-#define INACTIVE 100000000.0
+#define MAJOR_REVISION 		"1"
+#define MINOR_REVISION 		"0"
+#define STABLE_REVISION 	"0"
+#define PLUGIN_VERSION 		MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
-float BH_Radius[MAXTF2PLAYERS];
-float BH_Force[MAXTF2PLAYERS];
-float BH_Damage[MAXTF2PLAYERS];
-float BH_Duration[MAXTF2PLAYERS];
+#define MAXTF2PLAYERS		MAXPLAYERS+1
+#define INACTIVE			100000000.0
 
 public Plugin myinfo = 
 {
-    name        = PLUGIN_NAME,
-    author      = PLUGIN_AUTHOR,
-    description = PLUGIN_DESC,
-    version     = PLUGIN_VERSION,
-    url         = PLUGIN_URL,
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description	= PLUGIN_DESC,
+	version 	= PLUGIN_VERSION,
 };
+
+float BH_Duration[MAXTF2PLAYERS];
+float BH_Damage[MAXTF2PLAYERS];
+float BH_Radius[MAXTF2PLAYERS];
+float BH_Force[MAXTF2PLAYERS];
 
 public void OnPluginStart()
 {    
-    PrecacheSound("ambient/atmosphere/black_hole_01.wav");
-    PrecacheModel("sprites/strider_blackball.spr");
+    PrecacheSound("ambient/atmosphere/terrain_rumble1.wav");
+    PrecacheModel("materials/sprites/strider_blackball.vmt");
 }
 
 public void FF2R_OnAbility(int clientIdx, const char[] ability, AbilityData cfg)
 {
-    if (!cfg.IsMyPlugin())    
-        return;
-    
-    if (StrEqual(ability, "rage_black_hole", false))
-    {
-        Ability_BlackHole(clientIdx, ability, cfg);
-    }
+	if(!cfg.IsMyPlugin())	// Incase of duplicated ability names
+		return;
+	
+	if(!StrContains(ability, "rage_black_hole", false))
+	{
+		Ability_BlackHole(clientIdx, ability, cfg);
+	}
 }
 
 public void Ability_BlackHole(int clientIdx, const char[] ability_name, AbilityData ability)
 {
-    BH_Radius[clientIdx] = ability.GetFloat("radius", 500.0);
-    BH_Force[clientIdx] = ability.GetFloat("force", 1000.0);
-    BH_Damage[clientIdx] = ability.GetFloat("damage", 25.0);
-    BH_Duration[clientIdx] = ability.GetFloat("duration", 10.0);
+	BH_Duration[clientIdx] = ability.GetFloat("duration", 10.0);
+	BH_Damage[clientIdx] = ability.GetFloat("damage", 25.0);
+	BH_Radius[clientIdx] = ability.GetFloat("radius", 500.0);
+	BH_Force[clientIdx] = ability.GetFloat("force", 1000.0);
 
-    float bossPos[3];
-    GetClientAbsOrigin(clientIdx, bossPos);
+	float bossPos[3];
+	GetClientAbsOrigin(clientIdx, bossPos);
 
-    CreateBlackHole(bossPos, clientIdx);
+	CreateBlackHole(bossPos, clientIdx);
 }
 
 public void CreateBlackHole(float pos[3], int clientIdx)
 {
     // Play sound effect
-    EmitSoundToAll("ambient/atmosphere/black_hole_01.wav", clientIdx);
+    EmitSoundToAll("ambient/atmosphere/terrain_rumble1.wav", clientIdx);
 
     // Create particle effect
-    TE_SetupBeamRingPoint(pos, 10.0, BH_Radius[clientIdx], PrecacheModel("sprites/strider_blackball.spr"), 0, 0, 10, 10.0, 10.0, 5.0, {0, 0, 0, 255}, 10, 0);
+    TE_SetupBeamRingPoint(pos, 10.0, BH_Radius[clientIdx], PrecacheModel("materials/sprites/strider_blackball.vmt"), 0, 0, 10, 10.0, 10.0, 5.0, {0, 0, 0, 255}, 10, 0);
     TE_SendToAll();
 
     // Create timer to handle black hole effects

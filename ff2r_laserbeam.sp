@@ -1,29 +1,28 @@
 /*
-    "rage_laserbeam"    // Ability name can use suffixes
+    "rage_laserbeam"    								// Ability name can use suffixes
     {
         "slot"                  "0"                     // Ability slot
-        "tickrate"              "1"                     // Tickrate (don't change this)
-        "delay"                 "0.0"                   // Delay before shooting the beam
+        
         "duration"              "1.0"                   // Duration in seconds
+        "delay"                 "0.0"                   // Delay before shooting the beam
+        "tickrate"              "1"                     // Tickrate (don't change this)
         "max_distance"          "1000.0"                // Max distance in hammer units (HU)
         "beam_radius"           "4.0"                   // Beam radius in hammer units
-        "beam_x"                "2.0"                   // Beam X position
-        "beam_z"                "2.0"                   // Beam Z position
-        "beam_y"                "17.5"                  // Beam Y position
-        "beam_color_r"          "255"                   // Beam RED color
-        "beam_color_g"          "125"                   // Beam GREEN color
-        "beam_color_b"          "80"                    // Beam BLUE color
-        "beam_alpha"            "125"                   // Beam ALPHA value (0 = invis, 255 = fully visible)
         "exp_range"             "100.0"                 // Explosion range
         "min_damage"            "5.0"                   // Minimum damage that the laser can deal
         "max_damage"            "5.0"                   // Maximum damage that the laser can deal
         "min_building_damage"   "10.0"                  // Minimum damage to buildings
         "max_building_damage"   "20.0"                  // Maximum damage to buildings
+        "beam_x"                "2.0"                   // Beam X position
+        "beam_y"                "17.5"                  // Beam Y position
+        "beam_z"                "2.0"                   // Beam Z position
+        "beam_color_r"          "255"                   // Beam RED color
+        "beam_color_g"          "125"                   // Beam GREEN color
+        "beam_color_b"          "80"                    // Beam BLUE color
+        "beam_alpha"            "125"                   // Beam ALPHA value (0 = invis, 255 = fully visible)
         
         "plugin_name"           "ff2r_laserbeam"
     }
-    
-     
 */
 
 #include <sourcemod>
@@ -33,7 +32,6 @@
 #include <ff2r>
 #include <tf2_stocks>
 #include <tf2items>
-
 #undef REQUIRE_PLUGIN
 #include <tf2attributes>
 #define REQUIRE_PLUGIN
@@ -41,48 +39,45 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_NAME    "Freak Fortress 2 Rewrite: Laser Beam"
-#define PLUGIN_AUTHOR  "Onimusha"
-#define PLUGIN_DESC    "Laser beam ability for FF2R"
+#define PLUGIN_NAME    	"Freak Fortress 2 Rewrite: Laser Beam"
+#define PLUGIN_AUTHOR  	"Onimusha and Demo Samedi"
+#define PLUGIN_DESC    	"Laser beam ability for FF2R"
 
-#define MAJOR_REVISION "1"
-#define MINOR_REVISION "0"
+#define MAJOR_REVISION 	"1"
+#define MINOR_REVISION 	"0"
 #define STABLE_REVISION "0"
-#define PLUGIN_VERSION MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
+#define PLUGIN_VERSION 	MAJOR_REVISION..."."...MINOR_REVISION..."."...STABLE_REVISION
 
-#define PLUGIN_URL ""
+#define MAXTF2PLAYERS	MAXPLAYERS+1
+#define INACTIVE 		100000000.0
 
-#define MAXTF2PLAYERS 36
-#define INACTIVE 100000000.0
-
-float LB_TickRate[MAXTF2PLAYERS];
-float LB_Delay[MAXTF2PLAYERS];
 float LB_Duration[MAXTF2PLAYERS];
+float LB_Delay[MAXTF2PLAYERS];
+float LB_TickRate[MAXTF2PLAYERS];
 float LB_MaxDistance[MAXTF2PLAYERS];
 float LB_BeamRadius[MAXTF2PLAYERS];
-float LB_BeamX[MAXTF2PLAYERS];
-float LB_BeamZ[MAXTF2PLAYERS];
-float LB_BeamY[MAXTF2PLAYERS];
-int LB_BeamColorR[MAXTF2PLAYERS];
-int LB_BeamColorG[MAXTF2PLAYERS];
-int LB_BeamColorB[MAXTF2PLAYERS];
-int LB_BeamAlpha[MAXTF2PLAYERS];
 float LB_ExpRange[MAXTF2PLAYERS];
 float LB_MinDamage[MAXTF2PLAYERS];
 float LB_MaxDamage[MAXTF2PLAYERS];
 float LB_MinBuildingDamage[MAXTF2PLAYERS];
 float LB_MaxBuildingDamage[MAXTF2PLAYERS];
+float LB_BeamX[MAXTF2PLAYERS];
+float LB_BeamY[MAXTF2PLAYERS];
+float LB_BeamZ[MAXTF2PLAYERS];
+int LB_BeamColorR[MAXTF2PLAYERS];
+int LB_BeamColorG[MAXTF2PLAYERS];
+int LB_BeamColorB[MAXTF2PLAYERS];
+int LB_BeamAlpha[MAXTF2PLAYERS];
 
 float LB_StartTime[MAXTF2PLAYERS];
 bool LB_IsActive[MAXTF2PLAYERS];
 
 public Plugin myinfo = 
 {
-    name        = PLUGIN_NAME,
-    author      = PLUGIN_AUTHOR,
-    description = PLUGIN_DESC,
-    version     = PLUGIN_VERSION,
-    url         = PLUGIN_URL,
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description	= PLUGIN_DESC,
+	version 	= PLUGIN_VERSION,
 };
 
 public void OnPluginStart()
@@ -106,38 +101,38 @@ public void OnPluginEnd()
 
 public void FF2R_OnAbility(int clientIdx, const char[] ability, AbilityData cfg)
 {
-    if(!cfg.IsMyPlugin())    
-        return;
-    
-    if(!StrContains(ability, "rage_laserbeam", false))
-    {
-        Ability_LaserBeam(clientIdx, ability, cfg);
-    }
+	if(!cfg.IsMyPlugin())	// Incase of duplicated ability names
+		return;
+	
+	if(!StrContains(ability, "rage_laserbeam", false))
+	{
+		Ability_LaserBeam(clientIdx, ability, cfg);
+	}
 }
 
 public void Ability_LaserBeam(int clientIdx, const char[] ability_name, AbilityData ability)
 {
-    LB_TickRate[clientIdx] = ability.GetFloat("tickrate", 1.0);
-    LB_Delay[clientIdx] = ability.GetFloat("delay", 0.0);
-    LB_Duration[clientIdx] = ability.GetFloat("duration", 1.0);
-    LB_MaxDistance[clientIdx] = ability.GetFloat("max_distance", 1000.0);
-    LB_BeamRadius[clientIdx] = ability.GetFloat("beam_radius", 4.0);
-    LB_BeamX[clientIdx] = ability.GetFloat("beam_x", 2.0);
-    LB_BeamZ[clientIdx] = ability.GetFloat("beam_z", 2.0);
-    LB_BeamY[clientIdx] = ability.GetFloat("beam_y", 17.5);
-    LB_BeamColorR[clientIdx] = ability.GetInt("beam_color_r", 255);
-    LB_BeamColorG[clientIdx] = ability.GetInt("beam_color_g", 125);
-    LB_BeamColorB[clientIdx] = ability.GetInt("beam_color_b", 80);
-    LB_BeamAlpha[clientIdx] = ability.GetInt("beam_alpha", 125);
-    LB_ExpRange[clientIdx] = ability.GetFloat("exp_range", 100.0);
-    LB_MinDamage[clientIdx] = ability.GetFloat("min_damage", 5.0);
-    LB_MaxDamage[clientIdx] = ability.GetFloat("max_damage", 5.0);
-    LB_MinBuildingDamage[clientIdx] = ability.GetFloat("min_building_damage", 10.0);
-    LB_MaxBuildingDamage[clientIdx] = ability.GetFloat("max_building_damage", 20.0);
+	LB_Duration[clientIdx] = ability.GetFloat("duration", 1.0);
+	LB_Delay[clientIdx] = ability.GetFloat("delay", 0.0);
+	LB_TickRate[clientIdx] = ability.GetFloat("tickrate", 1.0);
+	LB_MaxDistance[clientIdx] = ability.GetFloat("max_distance", 1000.0);
+	LB_BeamRadius[clientIdx] = ability.GetFloat("beam_radius", 4.0);
+	LB_ExpRange[clientIdx] = ability.GetFloat("exp_range", 100.0);   
+	LB_MinDamage[clientIdx] = ability.GetFloat("min_damage", 5.0);
+	LB_MaxDamage[clientIdx] = ability.GetFloat("max_damage", 5.0);
+	LB_MinBuildingDamage[clientIdx] = ability.GetFloat("min_building_damage", 10.0);
+	LB_MaxBuildingDamage[clientIdx] = ability.GetFloat("max_building_damage", 20.0);    
+	LB_BeamX[clientIdx] = ability.GetFloat("beam_x", 2.0);
+	LB_BeamY[clientIdx] = ability.GetFloat("beam_y", 17.5);
+	LB_BeamZ[clientIdx] = ability.GetFloat("beam_z", 2.0);
+	LB_BeamColorR[clientIdx] = ability.GetInt("beam_color_r", 255);
+	LB_BeamColorG[clientIdx] = ability.GetInt("beam_color_g", 125);
+	LB_BeamColorB[clientIdx] = ability.GetInt("beam_color_b", 80);
+	LB_BeamAlpha[clientIdx] = ability.GetInt("beam_alpha", 125);
 
-    LB_StartTime[clientIdx] = GetGameTime() + LB_Delay[clientIdx];
-    LB_IsActive[clientIdx] = true;
-    SDKHook(clientIdx, SDKHook_PreThink, LaserBeam_PreThink);
+	LB_StartTime[clientIdx] = GetGameTime() + LB_Delay[clientIdx];
+	LB_IsActive[clientIdx] = true;
+	SDKHook(clientIdx, SDKHook_PreThink, LaserBeam_PreThink);
 }
 
 public void LaserBeam_PreThink(int clientIdx)
