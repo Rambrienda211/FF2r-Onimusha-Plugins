@@ -11,7 +11,7 @@
     "hud_x"          "-1.0"
     "hud_y"          "0.75"
     "strings"        "New Dash: [%s][%d/%d]"
-    
+    //Test
     "plugin_name"    "ff2r_dash"
 }
 */
